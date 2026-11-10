@@ -191,6 +191,18 @@ function addBlock(type, dropPoint = null) {
   draw();
 }
 
+function centerDroppedBlock(point) {
+  const node = nodeById(S.sel);
+  const view = node && plane.querySelector(`.scn-node[data-id="${node.id}"]`);
+  if (!node || !view) return;
+  const rect = view.getBoundingClientRect();
+  node.x = Math.max(20, Math.round((point.x - rect.width / 2) / 10) * 10);
+  node.y = Math.max(20, Math.round((point.y - rect.height / 2) / 10) * 10);
+  while (S.cur.nodes.some((other) => other.id !== node.id && Math.abs(other.x - node.x) < 40 && Math.abs(other.y - node.y) < 60)) node.y += 110;
+  markDirty();
+  draw();
+}
+
 function startPaletteDrag(type, row, e) {
   if (e.button !== 0) return;
   e.preventDefault();
@@ -224,6 +236,7 @@ function startPaletteDrag(type, row, e) {
     if (hit && hit.closest(".scn-canvas")) {
       const [x, y] = planePoint(ev);
       addBlock(type, { x, y });
+      centerDroppedBlock({ x, y });
     }
   };
   row.addEventListener("pointermove", move);
